@@ -1,3 +1,5 @@
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 
@@ -5,9 +7,7 @@ class CreateShortUrlRequest(BaseModel):
     long_url: str = Field(description="The long URL to shorten")
     tags: list[str] | None = Field(default=None, description="Tags to associate with the URL")
     custom_slug: str | None = Field(default=None, description="Custom short code")
-    valid_until: str | None = Field(
-        default=None, description="ISO 8601 datetime when URL expires"
-    )
+    valid_until: str | None = Field(default=None, description="ISO 8601 datetime when URL expires")
     max_visits: int | None = Field(default=None, description="Maximum number of visits")
 
 
@@ -21,12 +21,12 @@ class ShortUrlResponse(BaseModel):
 
 
 class ShortUrlDetails(ShortUrlResponse):
-    meta: dict | None = Field(default=None, description="URL metadata")
+    meta: dict[str, Any] | None = Field(default=None, description="URL metadata")
 
 
 class ShortUrlListResponse(BaseModel):
     data: list[ShortUrlResponse]
-    pagination: dict = Field(description="Pagination info")
+    pagination: dict[str, Any] = Field(description="Pagination info")
 
 
 class TagResponse(BaseModel):

@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
 
 from mcp_shlink.client import ShlinkClient
 from mcp_shlink.models import CreateShortUrlRequest

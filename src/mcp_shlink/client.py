@@ -1,12 +1,14 @@
+from typing import Annotated, Any
+
 import httpx
-from typing import Annotated
 
 from .models import (
     CreateShortUrlRequest,
-    ShortUrlResponse,
     ShortUrlDetails,
     ShortUrlListResponse,
+    ShortUrlResponse,
     TagListResponse,
+    TagResponse,
 )
 
 
@@ -22,22 +24,22 @@ class ShlinkClient:
     def close(self) -> None:
         self._client.close()
 
-    def _get(self, path: str) -> dict:
+    def _get(self, path: str) -> dict[str, Any]:
         response = self._client.get(f"{self.base_url}/rest/v3{path}")
         response.raise_for_status()
-        return response.json()
+        return response.json()  # type: ignore[no-any-return]
 
-    def _post(self, path: str, data: dict) -> dict:
+    def _post(self, path: str, data: dict[str, Any]) -> dict[str, Any]:
         response = self._client.post(f"{self.base_url}/rest/v3{path}", json=data)
         response.raise_for_status()
-        return response.json()
+        return response.json()  # type: ignore[no-any-return]
 
     def _delete(self, path: str) -> None:
         response = self._client.delete(f"{self.base_url}/rest/v3{path}")
         response.raise_for_status()
 
     def create_short_url(self, request: CreateShortUrlRequest) -> ShortUrlResponse:
-        data = {"longUrl": request.long_url}
+        data: dict[str, Any] = {"longUrl": request.long_url}
         if request.tags is not None:
             data["tags"] = request.tags
         if request.custom_slug is not None:

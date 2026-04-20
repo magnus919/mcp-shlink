@@ -1,7 +1,6 @@
-import pytest
 from unittest.mock import patch
 
-from mcp_shlink.tools import create_short_url, list_short_urls, delete_short_url
+from mcp_shlink.tools import create_short_url, delete_short_url, list_short_urls
 
 
 class TestMcpTools:
