@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mcp-shlink"
-version = "0.1.4"
+version = "0.1.5"
 description = "A Model Context Protocol server for Shlink link shortening service"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -39,6 +39,9 @@ Homepage = "https://github.com/magnus919/mcp-shlink"
 Documentation = "https://github.com/magnus919/mcp-shlink#readme"
 Repository = "https://github.com/magnus919/mcp-shlink"
 Issues = "https://github.com/magnus919/mcp-shlink/issues"
+
+[project.scripts]
+mcp-shlink = "mcp_shlink.server:run"
 
 [tool.ruff]
 line-length = 100
