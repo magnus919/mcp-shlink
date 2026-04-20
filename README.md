@@ -3,6 +3,7 @@
 [![PyPI version](https://img.shields.io/pypi/v/mcp-shlink.svg)](https://pypi.org/project/mcp-shlink/)
 [![Python versions](https://img.shields.io/pypi/pyversions/mcp-shlink.svg)](https://pypi.org/project/mcp-shlink/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![CI](https://github.com/magnus919/mcp-shlink/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/magnus919/mcp-shlink/actions/workflows/ci.yml)
 
 A Model Context Protocol (MCP) server for [Shlink](https://shlink.io/) link shortening service. This server exposes Shlink's URL shortening, management, and tagging capabilities as MCP tools for AI assistants.
 
