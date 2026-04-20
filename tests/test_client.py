@@ -37,17 +37,19 @@ class TestShlinkClient:
         with patch.object(mock_client._client, "get") as mock_get:
             mock_get.return_value = Mock(
                 json=lambda: {
-                    "data": [
-                        {
-                            "shortUrl": "https://example.com/s/abc123",
-                            "shortCode": "abc123",
-                            "longUrl": "https://example.com/very/long/url",
-                            "dateCreated": "2024-01-15T10:30:00+00:00",
-                            "tags": [],
-                            "visitsCount": 5,
-                        }
-                    ],
-                    "pagination": {"currentPage": 1, "pageCount": 1},
+                    "shortUrls": {
+                        "data": [
+                            {
+                                "shortUrl": "https://example.com/s/abc123",
+                                "shortCode": "abc123",
+                                "longUrl": "https://example.com/very/long/url",
+                                "dateCreated": "2024-01-15T10:30:00+00:00",
+                                "tags": [],
+                                "visitsSummary": {"total": 5},
+                            }
+                        ],
+                        "pagination": {"currentPage": 1, "pageCount": 1},
+                    }
                 }
             )
 
@@ -55,6 +57,7 @@ class TestShlinkClient:
 
             assert len(result.data) == 1
             assert result.data[0].short_code == "abc123"
+            assert result.data[0].visits_count == 5
             mock_get.assert_called_once()
 
     def test_get_short_url(self, mock_client):

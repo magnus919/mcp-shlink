@@ -61,6 +61,7 @@ class ShlinkClient:
 
     def list_short_urls(self) -> ShortUrlListResponse:
         result = self._get("/short-urls")
+        short_urls = result.get("shortUrls", {})
         return ShortUrlListResponse(
             data=[
                 ShortUrlResponse(
@@ -69,11 +70,11 @@ class ShlinkClient:
                     long_url=u["longUrl"],
                     date_created=u["dateCreated"],
                     tags=u.get("tags", []),
-                    visits_count=u.get("visitsCount", 0),
+                    visits_count=u.get("visitsSummary", {}).get("total", 0),
                 )
-                for u in result.get("data", [])
+                for u in short_urls.get("data", [])
             ],
-            pagination=result.get("pagination", {}),
+            pagination=short_urls.get("pagination", {}),
         )
 
     def get_short_url(self, short_code: str) -> ShortUrlDetails:
@@ -84,7 +85,7 @@ class ShlinkClient:
             long_url=result["longUrl"],
             date_created=result["dateCreated"],
             tags=result.get("tags", []),
-            visits_count=result.get("visitsCount", 0),
+            visits_count=result.get("visitsSummary", {}).get("total", 0),
             meta=result.get("meta"),
         )
 
