@@ -1,0 +1,42 @@
+name: Release Notes
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release-notes:
+    name: Generate release notes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Collect changelog since previous tag
+        id: changelog
+        run: |
+          PREV=$(git tag --sort=-creatordate | sed -n '2p')
+          CURR=$(git tag --sort=-creatordate | sed -n '1p')
+          if [ -z "$PREV" ]; then
+            LOG=$(git log --format='- %s (%h)' "$CURR")
+          else
+            LOG=$(git log --format='- %s (%h)' "$PREV..$CURR")
+          fi
+          {
+            echo "notes<<EOF"
+            echo "## Changes in $CURR"
+            echo ""
+            echo "$LOG"
+            echo ""
+            echo "**Full changelog**: https://github.com/${GITHUB_REPOSITORY}/compare/${PREV:-}...$CURR"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+      - name: Create GitHub release with notes
+        uses: softprops/action-gh-release@v2
+        with:
+          body: ${{ steps.changelog.outputs.notes }}
+          generate_release_notes: true

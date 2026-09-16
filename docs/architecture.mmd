@@ -1,0 +1,25 @@
+flowchart LR
+    subgraph Client["AI assistant / MCP client"]
+        HOST["MCP host (stdio)"]
+    end
+    subgraph Server["mcp-shlink server"]
+        TOOLS["FastMCP tool registry"]
+        CLIENT["ShlinkClient (httpx)"]
+        RETRY["Retry + backoff (flag: shlink.retry_5xx.enabled)"]
+        OBS["observability: JSON logs, redaction, trace ids, metrics"]
+        FLAGS["features: env-driven feature flags"]
+    end
+    subgraph Upstream["External service"]
+        SHLINK["Shlink REST v3 API"]
+    end
+    HOST -- "initialize / tools-list / tool calls" --> TOOLS
+    TOOLS -- "create_short_url" --> CLIENT
+    TOOLS -- "delete_short_url" --> CLIENT
+    TOOLS -- "get_metrics" --> CLIENT
+    TOOLS -- "get_short_url" --> CLIENT
+    TOOLS -- "list_short_urls" --> CLIENT
+    TOOLS -- "list_tags" --> CLIENT
+    CLIENT --> RETRY
+    RETRY -- "HTTP (X-Api-Key)" --> SHLINK
+    TOOLS -.-> OBS
+    TOOLS -.-> FLAGS

@@ -13,6 +13,24 @@ build/
 venv/
 env/
 
+# Environment / secrets (never commit real env files; .env.example is tracked)
+.env
+.env.*
+!.env.example
+
+# Test / coverage / type-cache artifacts
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+pytest-results.xml
+
+# Tool reports
+jscpd-report/
+report/
+
 # IDE
 .idea/
 .vscode/

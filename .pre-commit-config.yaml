@@ -1,0 +1,79 @@
+# Pre-commit hooks: run the same quality gates locally that CI enforces.
+# Install once with:  pre-commit install
+# Run on all files:   pre-commit run --all-files
+repos:
+  # Repo hygiene: block accidental large files and junk (also used by CI).
+  - repo: local
+    hooks:
+      - id: check-file-size
+        name: check file size (blocks files > 512 KiB)
+        entry: python scripts/check_file_size.py
+        language: python
+        types: [file]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-added-large-files
+        args: ["--maxkb=512"]
+      - id: check-merge-conflict
+      - id: detect-private-key
+
+  # Secret detection with an explicit baseline for test fixtures.
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ["--baseline", ".secrets.baseline"]
+
+  # Ruff: lint (incl. naming, complexity, TODO hygiene) and format.
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.11
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  # mypy strict over the package sources.
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy (strict)
+        entry: .venv/bin/mypy src/
+        language: system
+        pass_filenames: false
+        types: [python]
+
+  # Dead code detection.
+  - repo: local
+    hooks:
+      - id: vulture
+        name: vulture (dead code)
+        entry: .venv/bin/vulture src
+        language: system
+        pass_filenames: false
+        types: [python]
+
+  # Unused dependency detection.
+  - repo: local
+    hooks:
+      - id: deptry
+        name: deptry (unused dependencies)
+        entry: .venv/bin/deptry src
+        language: system
+        pass_filenames: false
+        types: [toml]
+
+  # AGENTS.md freshness: commands must match pyproject/CI tooling.
+  - repo: local
+    hooks:
+      - id: check-agents-md
+        name: check AGENTS.md command freshness
+        entry: python scripts/check_agents_md.py
+        language: python
+        pass_filenames: false
+        files: ^(AGENTS\.md|pyproject\.toml|\.github/workflows/ci\.yml)$

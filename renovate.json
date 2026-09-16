@@ -1,0 +1,51 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":semanticCommits",
+    ":dependencyDashboard"
+  ],
+  "timezone": "UTC",
+  "schedule": ["before 6am on monday"],
+  "rangeStrategy": "pin",
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true,
+    "automergeType": "branch"
+  },
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": ["security"]
+  },
+  "osvVulnerabilityAlerts": true,
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "description": "Wait 7 days after a release before adopting it (supply-chain delay window).",
+      "matchManagers": ["pip", "pep617", "uv"],
+      "minimumReleaseAge": "7 days",
+      "labels": ["dependencies", "release-age"]
+    },
+    {
+      "description": "Dev-only tooling: wait 3 days, automerge minor and patch updates.",
+      "matchDepTypes": ["dev"],
+      "minimumReleaseAge": "3 days",
+      "automerge": true,
+      "automergeType": "pr",
+      "matchUpdateTypes": ["minor", "patch"]
+    },
+    {
+      "description": "Runtime deps (mcp, httpx, pydantic): never automerge, always reviewed.",
+      "matchDepTypes": ["dependencies"],
+      "automerge": false,
+      "labels": ["dependencies", "runtime"]
+    },
+    {
+      "description": "GitHub Actions: pin by digest, update weekly.",
+      "matchManagers": ["github-actions"],
+      "pinDigests": true,
+      "minimumReleaseAge": "3 days",
+      "schedule": ["before 6am on monday"]
+    }
+  ]
+}

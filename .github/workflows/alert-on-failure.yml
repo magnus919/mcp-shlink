@@ -1,0 +1,49 @@
+name: Alert on CI failure
+
+on:
+  workflow_run:
+    workflows: ["CI", "CodeQL", "Publish to PyPI"]
+    types: [completed]
+
+permissions:
+  issues: write
+  actions: read
+
+jobs:
+  file-issue:
+    name: File issue for failed run
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deduplicate existing alert issue
+        id: dedup
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TITLE="CI failure on ${{ github.event.workflow_run.head_branch }}: ${{ github.event.workflow_run.name }}"
+          EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" \
+            --search "${TITLE} in:title state:open" --json number --jq 'length')
+          echo "existing=$EXISTING" >> "$GITHUB_OUTPUT"
+          echo "title=$TITLE" >> "$GITHUB_OUTPUT"
+      - name: Create alert issue
+        if: steps.dedup.outputs.existing == '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --repo "$GITHUB_REPOSITORY" \
+            --title "${{ steps.dedup.outputs.title }}" \
+            --label "ci-failure" \
+            --body "$(cat <<EOF
+          ## Automated CI failure alert
+
+          | Field | Value |
+          |-------|-------|
+          | Workflow | ${{ github.event.workflow_run.name }} |
+          | Branch | ${{ github.event.workflow_run.head_branch }} |
+          | Commit | ${{ github.event.workflow_run.head_sha }} |
+          | Run | ${{ github.event.workflow_run.html_url }} |
+
+          The failing run must be investigated before the next release.
+          See the [run log](${{ github.event.workflow_run.html_url }}) for details.
+          EOF
+          )"

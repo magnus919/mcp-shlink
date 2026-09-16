@@ -30,9 +30,19 @@ dependencies = [
 dev = [
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",
+    "pytest-cov>=5.0.0",
+    "pytest-xdist>=3.6.0",
+    "pytest-randomly>=3.15.0",
     "ruff>=0.4.0",
     "mypy>=1.10.0",
+    "vulture>=2.11",
+    "xenon>=0.9.1",
+    "deptry>=0.20.0",
+    "sentry-sdk>=2.0.0",
+    "python-dotenv>=1.0.0",
 ]
+error-tracking = ["sentry-sdk>=2.0.0"]
+dotenv = ["python-dotenv>=1.0.0"]
 
 [project.urls]
 Homepage = "https://github.com/magnus919/mcp-shlink"
@@ -47,9 +57,76 @@ mcp-shlink = "mcp_shlink.server:run"
 line-length = 100
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "W"]
+select = ["E", "F", "I", "W", "N", "C90", "TD"]
 ignore = []
+
+[tool.ruff.lint.mccabe]
+# Keep functions small enough to review and test.
+max-complexity = 10
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"os.environ".msg = "Use mcp_shlink.config.load_settings() so configuration stays documented and validated."
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["N802"]  # unittest-style test method names are intentionally CamelCase-free.
 
 [tool.mypy]
 python_version = "3.10"
 strict = true
+
+[tool.pytest.ini_options]
+# Unit tests follow the test_*.py convention.
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+# xdist + randomly run tests in parallel and in random order so ordering
+# dependencies surface as failures instead of hiding.
+addopts = [
+    "-n",
+    "auto",
+    "--durations=10",
+    "--cov=mcp_shlink",
+    "--cov-report=term-missing",
+]
+asyncio_mode = "strict"
+
+[tool.coverage.run]
+branch = true
+source = ["mcp_shlink"]
+
+[tool.coverage.report]
+# Agents must maintain coverage, not just observe it.
+fail_under = 80
+show_missing = true
+exclude_lines = ["if TYPE_CHECKING:", "pragma: no cover"]
+
+[tool.deptry]
+known_first_party = ["mcp_shlink", "tests"]
+
+[tool.deptry.per_rule_ignores]
+# Dev tooling and type stubs legitimately live in [dev] but are never imported.
+DEP002 = [
+    "pytest",
+    "pytest-asyncio",
+    "pytest-cov",
+    "pytest-xdist",
+    "pytest-randomly",
+    "ruff",
+    "mypy",
+    "vulture",
+    "xenon",
+    "deptry",
+    "python-dotenv",
+]
+
+[tool.vulture]
+paths = ["src"]
+min_confidence = 80
+ignore_names = ["model_config", "mcp"]
+
+[tool.xenon]
+max_absolute = "B"
+max_average = "A"
+max_modules = "B"
